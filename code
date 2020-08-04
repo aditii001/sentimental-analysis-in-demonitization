@@ -1,0 +1,44 @@
+import tweepy from tweepy import Stream from tweepy import OAuthHandler from tweepy.streaming import StreamListener ckey = '4tfvCrdH3Q7vrn6QM5vwzBzOd' csecret = 'AMoiYUfQcyPrsgz07lECZJ7OT7YXqV3C3ELk0ue10EZIx6PL1S' atoken = '3286722775-wlsQfhYmNvNhJxNtEtJ0NWF1yEHGY329EEDM32K' asecret = 'kpCIev3uuMRvAXCV1huDGzDGO0ucSyAoQ25N3ofHF0PiR'
+class listener(StreamListener):
+def on_data(self, data):
+print(data) saveFile=open('twitterDB.csv','a') saveFile.write(data) saveFile.write('\n') saveFile.close() return(True) def on_error(self, status):
+print(status)
+auth=OAuthHandler(ckey, csecret) auth.set_access_token(atoken, asecret) twitterStream=Stream(auth, listener())
+PAGE10
+twitterStream.filter(track=["Demonetization"]) Sentiment Analysis: import pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud importWordCloud import numpy as np
+tweets = pd.read_csv('C:/Users/Saloni/Desktop/tweetsdemon.csv', error_bad_lines=False, encoding="latin-1") tweets #cleandata tweets['text_new'] = '' tweets['tweetos'] = '' tweets['removeRTs']='' tweets['cleantweets']='' tweets['sentiment']=''
+#remove text:
+for i in range(len(tweets['Tweetstext'])):
+m = re.search("(?<=:)(.*)", tweets['Tweetstext'][i]) if tweets['Tweetstext'].str.contains('RT @')[i] == True:
+try:
+tweets['text_new'][i] = m.group(0) except AttributeError:
+tweets['text_new'][i] = tweets['Tweetstext'][i]
+else:
+tweets['text_new'][i] = m.group(0)
+#removeRTs
+for i in range(len(tweets['text_new'])):
+m = re.search("(?<=:)(.*)", tweets['text_new'][i])
+try:
+tweets['removeRTs'][i] = m.group(0) except AttributeError:
+PAGE11
+tweets['removeRTs'][i] = tweets['text_new'][i]
+#further cleaning for i in range(len(tweets['removeRTs'])):
+tweets['cleantweets'][i] = tweets['removeRTs'][i].lower()
+#remove urls
+tweets['cleantweets'][i] =
+re.sub('((www\.[^\s]+)|(https?://[^\s]+))','URL',tweets['cleantweets'][i])
+#Remove white spaces
+tweets['cleantweets'][i] = re.sub('[\s]+', ' ', tweets['cleantweets'][i])
+#Replace #word with word
+tweets['cleantweets'][i] = re.sub(r'#([^\s]+)', r'\1', tweets['cleantweets'][i])
+#trim
+tweets['cleantweets'][i] = tweets['cleantweets'][i].strip('\'"') tweets.head(100) import nltk from nltk.corpus import stopwords stopwords = nltk.corpus.stopwords.words('english') stopwords.append('https') from nltk.corpus import stopwords from nltk.tokenize import word_tokenize stop_words = set(stopwords.words('english'))
+tweets['tokenized']='' for i in range(len(tweets['cleantweets'])):
+sent = tweets['cleantweets'][i]
+#print(tweets['cleantweets'][i])
+word_tokens = word_tokenize(sent) tweets['tokenized'][i] = [word for word in word_tokens if not word in stop_words] tweets.head(100) from textblob import TextBlob
+for i in range(len(tweets['cleantweets'])): #print(tweets['removeRTs'][i]) analysis = TextBlob(tweets['cleantweets'][i]) analysis.sentiment if analysis.sentiment[0]>0: tweets['sentiment'][i]='Positive' elif analysis.sentiment[0]<0:
+tweets['sentiment'][i]='Negative' else:
+tweets['sentiment'][i]='Neutral' tweets.head(1000)
